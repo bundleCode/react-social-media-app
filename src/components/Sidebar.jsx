@@ -1,5 +1,6 @@
 import { IoHome } from "react-icons/io5";
 import { MdOutlinePostAdd } from "react-icons/md";
+import { PiSidebarSimpleDuotone } from "react-icons/pi";
 
 const Sidebar = ({ selectedTab, setSelectedTab }) => {
   return (
@@ -69,15 +70,8 @@ const Sidebar = ({ selectedTab, setSelectedTab }) => {
           href="/"
           className="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none"
         >
-          <svg
-            className="bi pe-none me-2"
-            width="40"
-            height="32"
-            aria-hidden="true"
-          >
-            <use xlinkHref="#bootstrap"></use>
-          </svg>{" "}
-          <span className="fs-4">Sidebar</span>
+          <PiSidebarSimpleDuotone size={20} />
+          <span className="fs-5 ms-3">Navigation</span>
         </a>
         <hr />
         <ul className="nav nav-pills flex-column mb-auto h-75">
