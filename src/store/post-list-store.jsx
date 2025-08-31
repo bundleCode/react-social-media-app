@@ -1,4 +1,4 @@
-import { createContext, useReducer } from "react";
+import { createContext, useCallback, useReducer } from "react";
 
 export const PostListContext = createContext({
   postList: [],
@@ -39,15 +39,21 @@ const PostListProvider = ({ children }) => {
       },
     });
   };
+  //useCallback is used to memoize/caches deletePost function and so it is only recreated when the dependency array dispatchPostList method is changed. This prevents unnecessary re-renders of the components.
+  // Why is this important?
+  // When you pass a function as a prop to a child component, React checks if the function has changed. If it has, React will re-render the child component. By memoizing the function with useCallback, you can prevent unnecessary re-renders and improve performance.
 
-  const deletePost = (postId) => {
-    dispatchPostList({
-      type: "delete-post",
-      payload: {
-        id: postId,
-      },
-    });
-  };
+  const deletePost = useCallback(
+    (postId) => {
+      dispatchPostList({
+        type: "delete-post",
+        payload: {
+          id: postId,
+        },
+      });
+    },
+    [dispatchPostList]
+  );
 
   const createInitialPosts = (postList) => {
     dispatchPostList({

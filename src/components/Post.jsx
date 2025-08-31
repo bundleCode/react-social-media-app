@@ -23,7 +23,10 @@ const Post = ({ post }) => {
             {tag}
           </span>
         ))}
-        <div className="d-flex  align-items-center small pt-3 py-2 gap-1">
+        <div
+          className="d-flex align-items-center  mt-3 gap-1 alert alert-primary mb-2"
+          role="alert"
+        >
           <div className="d-flex gap-1 align-items-center">
             This Post has <FaEye size={16} /> {post.views} views
           </div>
