@@ -1,9 +1,16 @@
-import { createContext, useCallback, useReducer } from "react";
+import {
+  createContext,
+  useCallback,
+  useReducer,
+  useState,
+  useEffect,
+} from "react";
 
 export const PostListContext = createContext({
   postList: [],
+  isFetching: false,
+  isError: false,
   createPost: () => {},
-  createInitialPosts: () => {},
   deletePost: () => {},
 });
 
@@ -22,27 +29,20 @@ const postListReducer = (currentPostList, action) => {
 };
 
 const PostListProvider = ({ children }) => {
+  const [isError, setIsError] = useState(null);
+  const [isFetching, setIsFetching] = useState(false);
   const [postList, dispatchPostList] = useReducer(postListReducer, []);
 
-  const createPost = (title, body, tags, reactions, views, userId) => {
-    const id = Date.now();
+  const createPost = (newPost) => {
     dispatchPostList({
       type: "add-new-post",
-      payload: {
-        id,
-        title,
-        body,
-        tags,
-        reactions,
-        views,
-        userId,
-      },
+      payload: newPost,
     });
   };
+
   //useCallback is used to memoize/caches deletePost function and so it is only recreated when the dependency array dispatchPostList method is changed. This prevents unnecessary re-renders of the components.
   // Why is this important?
   // When you pass a function as a prop to a child component, React checks if the function has changed. If it has, React will re-render the child component. By memoizing the function with useCallback, you can prevent unnecessary re-renders and improve performance.
-
   const deletePost = useCallback(
     (postId) => {
       dispatchPostList({
@@ -52,22 +52,54 @@ const PostListProvider = ({ children }) => {
         },
       });
     },
-    [dispatchPostList]
+    [dispatchPostList] //dependency dispatchPostList
   );
 
-  const createInitialPosts = (postList) => {
-    dispatchPostList({
-      type: "initial-posts",
-      payload: postList,
-    });
-  };
+  //Fetching initial popsts and dispatch the initial posts.
+  useEffect(() => {
+    //useEffect: Fetch data when the component mounts (means where react component is created and mounted to DOM)
+    let controller;
+    const fetchPosts = async () => {
+      //AbortController: to clean up side effects( abort fetch requests) when a component unmounts
+      controller = new AbortController();
+      const signal = controller.signal; //Get signal to pass to fetch
+
+      setIsFetching(true); //Only show spinner when actual fetch starts
+
+      try {
+        const response = await fetch("https://dummyjson.com/posts", { signal });
+        if (!response.ok) throw new Error("Failed to fetch posts");
+        const data = await response.json();
+        dispatchPostList({
+          type: "initial-posts",
+          payload: data.posts,
+        });
+      } catch (err) {
+        if (err.name === "AbortError") {
+          console.log("Fetch aborted, likely due to component unmount");
+        } else {
+          setIsError(err.message);
+        }
+      } finally {
+        setTimeout(() => {
+          setIsFetching(false);
+        }, 200);
+      }
+    };
+    fetchPosts(); //effect function calling.
+
+    return () => {
+      if (controller) controller.abort(); //Cleanup: abort the fetch if still running.
+    };
+  }, []); // The effect function fetchPosts runs only once after the initial render
 
   return (
     <PostListContext.Provider
       value={{
         postList,
         createPost,
-        createInitialPosts,
+        isFetching,
+        isError,
         deletePost,
       }}
     >

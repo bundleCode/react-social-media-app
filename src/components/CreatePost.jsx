@@ -15,7 +15,7 @@ const CreatePost = () => {
   const addNewPost = (event) => {
     event.preventDefault(); // prevents form from submitting to server
 
-    let userId = userIdElement.current.value;
+    let postUserId = userIdElement.current.value;
     let postTitle = postTitleElement.current.value;
     let postBody = postBodyElement.current.value;
     let postLikeReactions = userReactionsLikeElement.current.value;
@@ -27,15 +27,31 @@ const CreatePost = () => {
       dislikes: postDislikeReactions,
     };
 
-    userIdElement.current.value = "";
+    /*userIdElement.current.value = "";
     postTitleElement.current.value = "";
     postBodyElement.current.value = "";
     userReactionsLikeElement.current.value = "";
     userReactionsDislikeElement.current.value = "";
     postViewsElement.current.value = "";
-    postTagsElement.current.value;
+    postTagsElement.current.value = ""; */
 
-    createPost(postTitle, postBody, postTags, reactions, postViews, userId);
+    // Sending data to server for adding new post
+    fetch("https://dummyjson.com/posts/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: postTitle,
+        body: postBody,
+        tags: postTags,
+        reactions: reactions,
+        views: postViews,
+        userId: postUserId,
+      }),
+    })
+      .then((res) => res.json())
+      .then((resObj) => createPost(resObj));
+
+    // createPost(postTitle, postBody, , reactions, postViews, userId);
   };
 
   return (
